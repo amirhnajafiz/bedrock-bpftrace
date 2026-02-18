@@ -45,6 +45,7 @@ tracepoint:sched:sched_process_exit
   delete(@tracked[pid]);
 }
 
+
 /* creat enter + exit */
 tracepoint:syscalls:sys_enter_creat
 / @tracked[pid] /
@@ -187,6 +188,7 @@ tracepoint:syscalls:sys_exit_close
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX close}{ret=%d}\n", nsecs, pid, tid, comm, args->ret);
 }
+
 
 /* read enter + exit */
 tracepoint:syscalls:sys_enter_read

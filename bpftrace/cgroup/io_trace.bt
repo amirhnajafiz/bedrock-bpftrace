@@ -8,6 +8,7 @@ BEGIN
   printf("%s START tracing events for CGROUP ID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
 }
 
+
 /* creat enter + exit */
 tracepoint:syscalls:sys_enter_creat
 / cgroup == @tracked_cgid /
@@ -150,6 +151,7 @@ tracepoint:syscalls:sys_exit_close
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX close}{ret=%d}\n", nsecs, pid, tid, comm, args->ret);
 }
+
 
 /* read enter + exit */
 tracepoint:syscalls:sys_enter_read

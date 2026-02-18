@@ -1,5 +1,6 @@
 {{ begin_section }}
 
+{% if capture_metadata %}
 /* creat enter + exit */
 tracepoint:syscalls:sys_enter_creat
 {{ filter }}
@@ -142,6 +143,7 @@ tracepoint:syscalls:sys_exit_close
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX close}{ret=%d}\n", nsecs, pid, tid, comm, args->ret);
 }
+{% endif %}
 
 /* mmap enter + exit */
 tracepoint:syscalls:sys_enter_mmap
