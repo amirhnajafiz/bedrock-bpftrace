@@ -91,9 +91,11 @@ if __name__ == "__main__":
 
             # form the paths
             template_path = os.path.join(templates_dir_path, out) + ".j2"
-            output_path = os.path.join(output_dir_path, out)
 
+            # export with or without capture_metadata
+            output_path = os.path.join(output_dir_path, out)
             tmp = read_template(template_path)
+
             res = tmp.render(
                 begin_section=begin_section,
                 filter=filter_section,
@@ -101,6 +103,20 @@ if __name__ == "__main__":
             )
 
             save_template(output_path, res)
+
+            logging.info(f"template saved: {output_path}")
+
+            output_path = os.path.join(output_dir_path, "silent_" + out)
+            tmp = read_template(template_path)
+
+            res = tmp.render(
+                begin_section=begin_section,
+                filter=filter_section,
+                capture_metadata=False,
+            )
+
+            save_template(output_path, res)
+
             logging.info(f"template saved: {output_path}")
 
     logging.info("done")

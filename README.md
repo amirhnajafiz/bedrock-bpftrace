@@ -1,2 +1,3 @@
-# bedrock-bpftrace
+# Bedrock BPFtrace
+
 Bedrock bpftrace scripts.
