@@ -16,7 +16,7 @@ BEGIN
 tracepoint:sched:sched_process_fork
 / @tracked[args->parent_pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, str(args->parent_comm), args->child_pid, str(args->child_comm));
 
   @fname[pid, 0] = "STDIN";
   @fname[pid, 1] = "STDOUT";
