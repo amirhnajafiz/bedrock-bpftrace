@@ -36,3 +36,7 @@ Each category includes two tracing modes:
 ### Silent Mode
 
 A silent mode is also available. When enabled, metadata collection is omitted to reduce log volume. This mode is useful for high-level I/O monitoring where detailed file access patterns are not required.
+
+## Tracing Events
+
+Read more about the tracing events in [EVENTS.md](EVENTS.md).
