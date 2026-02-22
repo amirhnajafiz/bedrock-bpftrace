@@ -9,7 +9,6 @@ BEGIN
   printf("%s START tracing events for CGROUP ID %llu (filter command: %s)\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1, str($2));
 }
 
-
 /* creat enter + exit */
 tracepoint:syscalls:sys_enter_creat
 / cgroup == @tracked_cgid && comm == @tracked_comm /

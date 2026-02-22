@@ -1,14 +1,14 @@
 #!/usr/bin/env bpftrace
-// dir: src/bpftrace/execute
+// dir: src/bpftrace/pid
 // log format: [timestamp] {pid=[pid] tid=[tid] proc=[command]}{[EN|EX] [operand]} {[key=value]}
 
 BEGIN
 {
-  @fname[cpid, 0] = "STDIN";
-  @fname[cpid, 1] = "STDOUT";
-  @fname[cpid, 2] = "STDERR";
-  @tracked[cpid] = 1;
-  printf("%s START tracing events for CPID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), cpid);
+  @fname[$1, 0] = "STDIN";
+  @fname[$1, 1] = "STDOUT";
+  @fname[$1, 2] = "STDERR";
+  @tracked[$1] = 1;
+  printf("%s START tracing events for PID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
 }
 
 /* ----- Child Process Tracing ----- */
@@ -47,7 +47,6 @@ tracepoint:sched:sched_process_exit
   delete(@fname[pid, 2]);
   delete(@tracked[pid]);
 }
-
 
 
 /* mmap enter + exit */

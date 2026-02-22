@@ -48,7 +48,6 @@ tracepoint:sched:sched_process_exit
   delete(@tracked[pid]);
 }
 
-
 /* creat enter + exit */
 tracepoint:syscalls:sys_enter_creat
 / @tracked[pid] /

@@ -10,7 +10,6 @@ BEGIN
 }
 
 
-
 /* mmap enter + exit */
 tracepoint:syscalls:sys_enter_mmap
 / cgroup == @tracked_cgid && comm == @tracked_comm /

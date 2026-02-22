@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
             logging.info(f"template saved: {output_path}")
 
-            output_path = os.path.join(output_dir_path, "silent_" + out)
+            output_path = os.path.join(output_dir_path, "headless_" + out)
             tmp = read_template(template_path)
 
             res = tmp.render(
