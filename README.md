@@ -40,3 +40,11 @@ A silent mode is also available. When enabled, metadata collection is omitted to
 ## Tracing Events
 
 Read more about the tracing events in [EVENTS.md](EVENTS.md).
+
+## Format
+
+The output logs have the following format:
+
+```txt
+[timestamp] {pid=[pid] tid=[tid] proc=[command]}{[EN|EX] [operand]}{[key=value]}
+```

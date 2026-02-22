@@ -1,6 +1,4 @@
 #!/usr/bin/env bpftrace
-// dir: src/bpftrace/execute
-// log format: [timestamp] {pid=[pid] tid=[tid] proc=[command]}{[EN|EX] [operand]} {[key=value]}
 
 BEGIN
 {
@@ -53,7 +51,7 @@ tracepoint:sched:sched_process_exit
 tracepoint:syscalls:sys_enter_mmap
 / @tracked[pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN mmap}{fd=%d addr=%lu len=%lu}\n", nsecs, pid, tid, comm, args->fd, args->addr, args->len);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN mmap}{fd=%d, addr=%lu, len=%lu}\n", nsecs, pid, tid, comm, args->fd, args->addr, args->len);
 }
 
 tracepoint:syscalls:sys_exit_mmap
@@ -66,7 +64,7 @@ tracepoint:syscalls:sys_exit_mmap
 tracepoint:syscalls:sys_enter_munmap
 / @tracked[pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN munmap}{addr=%lu len=%lu}\n", nsecs, pid, tid, comm, args->addr, args->len);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN munmap}{addr=%lu, len=%lu}\n", nsecs, pid, tid, comm, args->addr, args->len);
 }
 
 tracepoint:syscalls:sys_exit_munmap
@@ -80,12 +78,12 @@ tracepoint:exceptions:page_fault_user
 / @tracked[pid] /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EN page_fault_user}{addr=%lu}\n", nsecs, pid, tid, comm, args->address);
-  @start[tid] = nsecs;
+  @erec[tid] = 1;
 }
 
 kretprobe:handle_mm_fault
-/ @start[tid] /
+/ @erec[tid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EX page_fault_user}{latency=%llu}\n", nsecs, pid, tid, comm, nsecs - @start[tid]);
-  delete(@start[tid]);
+  printf("%llu {pid=%d tid=%d proc=%s}{EX page_fault_user}{}\n", nsecs, pid, tid, comm);
+  delete(@erec[tid]);
 }

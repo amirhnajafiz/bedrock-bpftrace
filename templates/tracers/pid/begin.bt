@@ -1,6 +1,4 @@
 #!/usr/bin/env bpftrace
-// dir: src/bpftrace/pid
-// log format: [timestamp] {pid=[pid] tid=[tid] proc=[command]}{[EN|EX] [operand]} {[key=value]}
 
 BEGIN
 {

@@ -56,7 +56,7 @@ tracepoint:syscalls:sys_exit_dup
 tracepoint:syscalls:sys_enter_dup2
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN dup2}{oldfd=%d newfd=%d}\n", nsecs, pid, tid, comm, args->oldfd, args->newfd);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN dup2}{oldfd=%d, newfd=%d}\n", nsecs, pid, tid, comm, args->oldfd, args->newfd);
 }
 
 tracepoint:syscalls:sys_exit_dup2
@@ -69,7 +69,7 @@ tracepoint:syscalls:sys_exit_dup2
 tracepoint:syscalls:sys_enter_dup3
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN dup3}{oldfd=%d newfd=%d}\n", nsecs, pid, tid, comm, args->oldfd, args->newfd);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN dup3}{oldfd=%d, newfd=%d}\n", nsecs, pid, tid, comm, args->oldfd, args->newfd);
 }
 
 tracepoint:syscalls:sys_exit_dup3
@@ -148,7 +148,7 @@ tracepoint:syscalls:sys_exit_close
 tracepoint:syscalls:sys_enter_read
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN read}{fd=%d count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN read}{fd=%d, count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
 }
 
 tracepoint:syscalls:sys_exit_read
@@ -161,7 +161,7 @@ tracepoint:syscalls:sys_exit_read
 tracepoint:syscalls:sys_enter_write
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN write}{fd=%d count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN write}{fd=%d, count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
 }
 
 tracepoint:syscalls:sys_exit_write
@@ -174,7 +174,7 @@ tracepoint:syscalls:sys_exit_write
 tracepoint:syscalls:sys_enter_pread64
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN pread64}{fd=%d count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN pread64}{fd=%d, count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
 }
 
 tracepoint:syscalls:sys_exit_pread64
@@ -187,7 +187,7 @@ tracepoint:syscalls:sys_exit_pread64
 tracepoint:syscalls:sys_enter_pwrite64
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN pwrite64}{fd=%d count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN pwrite64}{fd=%d, count=%d}\n", nsecs, pid, tid, comm, args->fd, args->count);
 }
 
 tracepoint:syscalls:sys_exit_pwrite64
@@ -200,7 +200,7 @@ tracepoint:syscalls:sys_exit_pwrite64
 tracepoint:syscalls:sys_enter_readv
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN readv}{fd=%d count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN readv}{fd=%d, count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
 }
 
 tracepoint:syscalls:sys_exit_readv
@@ -213,7 +213,7 @@ tracepoint:syscalls:sys_exit_readv
 tracepoint:syscalls:sys_enter_writev
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN writev}{fd=%d count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN writev}{fd=%d, count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
 }
 
 tracepoint:syscalls:sys_exit_writev
@@ -226,7 +226,7 @@ tracepoint:syscalls:sys_exit_writev
 tracepoint:syscalls:sys_enter_preadv
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN preadv}{fd=%d count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN preadv}{fd=%d, count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
 }
 
 tracepoint:syscalls:sys_exit_preadv
@@ -239,7 +239,7 @@ tracepoint:syscalls:sys_exit_preadv
 tracepoint:syscalls:sys_enter_pwritev
 {{ filter }}
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN pwritev}{fd=%d count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN pwritev}{fd=%d, count=%lu}\n", nsecs, pid, tid, comm, args->fd, args->vlen);
 }
 
 tracepoint:syscalls:sys_exit_pwritev
