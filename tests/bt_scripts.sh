@@ -14,21 +14,30 @@ if [ ! -d "$BASE_DIR" ]; then
     exit 1
 fi
 
-# Find all .bt files recursively
-# Using find to traverse all children until no directories remain
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
     echo "[INFO] Testing: ${script_path}"
 
-    # Run bpftrace dry-run
-    # Capture stderr only, suppress stdout
-    err_output=$(bpftrace --dry-run "$script_path" 2>&1 >/dev/null) || {
-        echo "[ERROR] Dry-run failed for: ${script_path}"
-        echo "[ERROR] bpftrace error output:"
-        echo "---------"
-        echo "$err_output"
-        echo "---------"
-        exit 1
-    }
+    parent_dir="$(dirname "$script_path")"
+
+    if [ -x "$parent_dir" ]; then
+        err_output=$(bpftrace --dry-run -c "ls" "$script_path" 2>&1 >/dev/null) || {
+            echo "[ERROR] Dry-run failed for: ${script_path}"
+            echo "[ERROR] bpftrace error output:"
+            echo "---------"
+            echo "$err_output"
+            echo "---------"
+            exit 1
+        }
+    else
+        err_output=$(bpftrace --dry-run "$script_path" 2>&1 >/dev/null) || {
+            echo "[ERROR] Dry-run failed for: ${script_path}"
+            echo "[ERROR] bpftrace error output:"
+            echo "---------"
+            echo "$err_output"
+            echo "---------"
+            exit 1
+        }
+    fi
 
 done
 
