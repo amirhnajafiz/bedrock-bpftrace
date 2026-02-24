@@ -3,7 +3,7 @@
 
 set -eu
 
-BASE_DIR="bpftrace"
+BASE_DIR="/usr/local/app/bpftrace"
 
 echo "[INFO] Starting recursive bpftrace dry-run tests"
 echo "[INFO] Base directory: ${BASE_DIR}"
@@ -19,9 +19,9 @@ fi
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
     echo "[INFO] Testing: ${script_path}"
 
-    # Run bpftrace dry-run (-dd)
+    # Run bpftrace dry-run
     # Capture stderr only, suppress stdout
-    err_output=$(bpftrace -dd "$script_path" 2>&1 >/dev/null) || {
+    err_output=$(bpftrace --dry-run "$script_path" 2>&1 >/dev/null) || {
         echo "[ERROR] Dry-run failed for: ${script_path}"
         echo "[ERROR] bpftrace error output:"
         echo "---------"
