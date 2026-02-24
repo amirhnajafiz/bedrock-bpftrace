@@ -2,10 +2,10 @@
 
 BEGIN
 {
-  @fname[cpid, 0] = "STDIN";
-  @fname[cpid, 1] = "STDOUT";
-  @fname[cpid, 2] = "STDERR";
-  @tracked[cpid] = 1;
+  @fname[(int64)cpid, 0] = "STDIN";
+  @fname[(int64)cpid, 1] = "STDOUT";
+  @fname[(int64)cpid, 2] = "STDERR";
+  @tracked[(int64)cpid] = 1;
   printf("%s START tracing events for CPID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), cpid);
 }
 
