@@ -3,11 +3,14 @@ VENV_DIR ?= .venv
 VENV_PYTHON := $(VENV_DIR)/bin/python
 VENV_PIP := $(VENV_DIR)/bin/pip
 
-.PHONY: all setup venv deps generate clean distclean
+.PHONY: all setup venv deps generate clean distclean bpftrace
 
 all: generate
 
 setup: deps
+
+bpftrace:
+	sudo ./install-bpftrace.sh
 
 venv:
 	@if [ ! -d "$(VENV_DIR)" ]; then \

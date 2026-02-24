@@ -2,6 +2,13 @@
 
 Bedrock BPFtrace is a repository of bpftrace scripts used by the Bedrock tracer. All tracing scripts are generated from Python + Jinja2 templates and exported in .bt format.
 
+## Requirements
+
+* libbpf v1.5.0+
+* bpftrace v0.24.0+
+* python3
+* python3-venv
+
 ## Overview
 
 This repository contains the BPFtrace programs required for Bedrock’s tracing engine. Templates are written in Python using Jinja2 and compiled into ready-to-run .bt scripts.
