@@ -67,8 +67,8 @@ RUN git clone --branch ${BPFTRACE_VERSION} --depth 1 https://github.com/bpftrace
 
 WORKDIR /usr/local/app
 
-COPY bpftrace/ .
-COPY tests/bt_scripts.sh .
+COPY bpftrace/ bpftrace/
+COPY tests/bt_scripts.sh bt_scripts.sh
 
 # Default command
-CMD ["./bt_scripts.sh"]
+CMD ["./bt_scripts.sh", "/usr/local/app/bpftrace"]
