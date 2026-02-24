@@ -49,7 +49,7 @@ RUN apt-get update && apt-get install -y \
 RUN git clone --branch ${LIBBPF_VERSION} --depth 1 https://github.com/libbpf/libbpf.git /tmp/libbpf && \
     cd /tmp/libbpf/src && \
     make && \
-    make install && \
+    make install PREFIX=/usr LIBDIR=/usr/lib/x86_64-linux-gnu && \
     ldconfig && \
     rm -rf /tmp/libbpf
 

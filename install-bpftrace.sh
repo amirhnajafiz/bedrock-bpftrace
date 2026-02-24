@@ -55,7 +55,7 @@ git clone --branch ${LIBBPF_VERSION} --depth 1 https://github.com/libbpf/libbpf.
 
 cd /tmp/libbpf/src
 make
-sudo make install
+sudo make install PREFIX=/usr LIBDIR=/usr/lib/x86_64-linux-gnu
 sudo ldconfig
 
 echo "[+] libbpf installed successfully"
