@@ -9,10 +9,39 @@ sudo apt update
 
 echo "[+] Installing dependencies..."
 sudo apt install -y \
-  git build-essential cmake flex bison \
+  linux-tools-generic \
+  linux-tools-common \
+  linux-headers-generic \
+  libbpfcc-dev \
+  bpfcc-tools \
+  libcereal-dev \
+  llvm-18 \
+  llvm-18-dev \
+  clang-18 \
+  libclang-18-dev \
+  pahole \
+  libgtest-dev \
+  libgmock-dev \
+  libdw-dev \
+  git \
+  ca-certificates \
+  make \
+  g++ \
+  kmod \
+  wget \
+  curl \
+  apt-transport-https \
+  gnupg \
+  libseccomp2 \
+  xz-utils \
+  procps \
+  build-essential \
+  cmake \
+  flex \
+  bison \
+  xxd \
   libelf-dev zlib1g-dev \
   libfl-dev libedit-dev \
-  clang llvm \
   pkg-config \
   libssl-dev
 
@@ -27,9 +56,6 @@ git clone --branch ${LIBBPF_VERSION} --depth 1 https://github.com/libbpf/libbpf.
 cd /tmp/libbpf/src
 make
 sudo make install
-
-# Ensure pkg-config can find it
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 sudo ldconfig
 
 echo "[+] libbpf installed successfully"
