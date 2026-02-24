@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
     libelf-dev zlib1g-dev \
     libfl-dev libedit-dev \
     pkg-config \
-    libssl-dev
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------
