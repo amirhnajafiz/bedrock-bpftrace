@@ -5,7 +5,7 @@ BEGIN
   @fname[$1, 0] = "STDIN";
   @fname[$1, 1] = "STDOUT";
   @fname[$1, 2] = "STDERR";
-  @tracked[$1] = 1;
+  @tracked[(uint64)$1] = 1;
   printf("%s START tracing events for PID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
 }
 
@@ -19,7 +19,7 @@ tracepoint:sched:sched_process_fork
   @fname[pid, 0] = "STDIN";
   @fname[pid, 1] = "STDOUT";
   @fname[pid, 2] = "STDERR";
-  @tracked[args->child_pid] = 1;
+  @tracked[(uint64)args->child_pid] = 1;
 }
 
 /* when exec happens, if old_pid tracked ensure that the new pid is also tracked */
@@ -31,7 +31,7 @@ tracepoint:sched:sched_process_exec
   @fname[pid, 0] = "STDIN";
   @fname[pid, 1] = "STDOUT";
   @fname[pid, 2] = "STDERR";
-  @tracked[args->pid] = 1;
+  @tracked[(uint64)args->pid] = 1;
 }
 
 /* cleanup process fname table and untrack process */
