@@ -4,8 +4,8 @@
 set -eu
 
 BASE_DIR="bpftrace"
-if [ ! -z "$1" ]; then
-    BASE_DIR=$1
+if [ -n "$1" ]; then
+    BASE_DIR="$1"
 fi
 
 echo "[INFO] Starting recursive bpftrace dry-run tests"
