@@ -3,7 +3,10 @@
 
 set -eu
 
-BASE_DIR="/usr/local/app/bpftrace"
+BASE_DIR="bpftrace"
+if [ ! -z "$1" ]; then
+    BASE_DIR=$1
+fi
 
 echo "[INFO] Starting recursive bpftrace dry-run tests"
 echo "[INFO] Base directory: ${BASE_DIR}"
