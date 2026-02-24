@@ -3,10 +3,7 @@
 
 set -eu
 
-BASE_DIR="bpftrace"
-if [ -n "$1" ]; then
-    BASE_DIR="$1"
-fi
+BASE_DIR="${1:-bpftrace}"
 
 echo "[INFO] Starting recursive bpftrace dry-run tests"
 echo "[INFO] Base directory: ${BASE_DIR}"
