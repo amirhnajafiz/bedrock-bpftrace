@@ -16,7 +16,7 @@ tracepoint:sched:sched_process_fork
   @fname[pid, 0] = "STDIN";
   @fname[pid, 1] = "STDOUT";
   @fname[pid, 2] = "STDERR";
-  @tracked[(uint64)args->child_pid] = 1;
+  @tracked[args->child_pid] = 1;
 }
 
 /* when exec happens, if old_pid tracked ensure that the new pid is also tracked */
@@ -28,17 +28,17 @@ tracepoint:sched:sched_process_exec
   @fname[pid, 0] = "STDIN";
   @fname[pid, 1] = "STDOUT";
   @fname[pid, 2] = "STDERR";
-  @tracked[(uint64)args->pid] = 1;
+  @tracked[args->pid] = 1;
 }
 
 /* cleanup process fname table and untrack process */
 tracepoint:sched:sched_process_exit
-/ @tracked[pid] /
+/ @tracked[(int64)pid] /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX process}{}\n", nsecs, pid, tid, comm);
 
   delete(@fname[pid, 0]);
   delete(@fname[pid, 1]);
   delete(@fname[pid, 2]);
-  delete(@tracked[pid]);
+  delete(@tracked[(int64)pid]);
 }
