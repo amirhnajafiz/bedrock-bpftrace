@@ -1,0 +1,8 @@
+build/
+templates/
+
+install-bpftrace.sh
+gen_bpftrace.py
+tracers.json
+Makefile
+requirements.txt

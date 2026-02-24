@@ -65,7 +65,9 @@ RUN git clone --branch ${BPFTRACE_VERSION} --depth 1 https://github.com/bpftrace
     ldconfig && \
     rm -rf /tmp/bpftrace
 
-WORKDIR /app
+WORKDIR /usr/local/app
+
+COPY bpftrace/ .
 COPY tests/bt_scripts.sh .
 
 # Default command
