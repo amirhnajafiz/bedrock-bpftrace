@@ -8,28 +8,38 @@ ENV LIBBPF_VERSION=v1.5.0
 ENV BPFTRACE_VERSION=v0.24.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    ca-certificates \
-    build-essential \
-    cmake \
-    clang-18 \
+    libbpfcc-dev \
+    bpfcc-tools \
+    libcereal-dev \
     llvm-18 \
     llvm-18-dev \
+    clang-18 \
     libclang-18-dev \
-    libclang-cpp18-dev \
+    pahole \
+    libgtest-dev \
+    libgmock-dev \
+    libdw-dev \
+    git \
+    ca-certificates \
+    make \
+    g++ \
+    kmod \
+    wget \
+    curl \
+    apt-transport-https \
+    gnupg \
+    libseccomp2 \
+    xz-utils \
+    procps \
+    build-essential \
+    cmake \
     flex \
     bison \
-    pkg-config \
-    libelf-dev \
-    zlib1g-dev \
-    libfl-dev \
-    libedit-dev \
-    libssl-dev \
-    libdw-dev \
-    libcereal-dev \
-    libbpfcc-dev \
-    pahole \
     xxd \
+    libelf-dev zlib1g-dev \
+    libfl-dev libedit-dev \
+    pkg-config \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build libbpf
