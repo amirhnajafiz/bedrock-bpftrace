@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     llvm-18 \
     llvm-18-dev \
     libclang-18-dev \
+    libclang-cpp18-dev \
     flex \
     bison \
     pkg-config \
@@ -26,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libdw-dev \
     libcereal-dev \
+    libbpfcc-dev \
     pahole \
     xxd \
     && rm -rf /var/lib/apt/lists/*
@@ -40,7 +42,10 @@ RUN git clone --depth 1 --branch ${LIBBPF_VERSION} \
 # Build bpftrace
 RUN git clone --depth 1 --branch ${BPFTRACE_VERSION} \
     https://github.com/bpftrace/bpftrace.git /tmp/bpftrace && \
-    cmake -S /tmp/bpftrace -B /tmp/bpftrace/build -DCMAKE_BUILD_TYPE=Release && \
+    cmake -S /tmp/bpftrace -B /tmp/bpftrace/build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DLLVM_DIR=/usr/lib/llvm-18/lib/cmake/llvm \
+        -DClang_DIR=/usr/lib/llvm-18/lib/cmake/clang && \
     cmake --build /tmp/bpftrace/build -j$(nproc) && \
     cmake --install /tmp/bpftrace/build && \
     strip /usr/local/bin/bpftrace && \
@@ -61,6 +66,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libdw1 \
     libseccomp2 \
+    libbcc \
     kmod \
     procps \
     ca-certificates \
