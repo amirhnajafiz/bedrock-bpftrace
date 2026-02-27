@@ -44,22 +44,20 @@ tracepoint:sched:sched_process_exit
 }
 /* vfs read and write trace */
 
-kprobe:vfs_read
+kfunc:vfs_read
 / @tracked[(int64)pid] /
 {
-  $file = (struct file *)args0;
-  $count = (size_t)args2;
-  $pos = (unsigned long)args3;
-  $ret = (ssize_t)args4;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
+  $file = args->file;
+  $count = args->count;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%llu}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
-kprobe:vfs_write
+kfunc:vfs_write
 / @tracked[(int64)pid] /
 {
-  $file = (struct file *)args0;
-  $count = (size_t)args2;
-  $pos = (unsigned long)args3;
-  $ret = (ssize_t)args4;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
+  $file = args->file;
+  $count = args->count;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%llu}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
