@@ -1,0 +1,22 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @tracked_cgid = (uint64)$1;
+  printf("%s START tracing events for CGROUP ID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
+}
+/* vfs read and write trace */
+
+kfunc:vfs_read
+/ cgroup == @tracked_cgid /
+{
+  $ret = (ssize_t)args4;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
+}
+
+kfunc:vfs_write
+/ cgroup == @tracked_cgid /
+{
+  $ret = (ssize_t)args4;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
+}

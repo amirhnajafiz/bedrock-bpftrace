@@ -5,7 +5,8 @@
     "outputs_dir": "bpftrace",
     "sources": [
         "io_trace.bt",
-        "memory_trace.bt"
+        "memory_trace.bt",
+        "vfs_trace.bt"
     ],
     "inputs": [
        "cgroup",
