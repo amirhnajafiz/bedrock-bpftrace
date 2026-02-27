@@ -47,14 +47,14 @@ tracepoint:sched:sched_process_exit
 }
 /* vfs read and write trace */
 
-kprobe:vfs_read
+kretprobe:vfs_read
 / @tracked[pid] /
 {
   $ret = (ssize_t)args4;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
 }
 
-kprobe:vfs_write
+kretprobe:vfs_write
 / @tracked[pid] /
 {
   $ret = (ssize_t)args4;

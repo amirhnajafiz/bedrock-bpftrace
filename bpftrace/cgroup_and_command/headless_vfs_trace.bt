@@ -8,14 +8,14 @@ BEGIN
 }
 /* vfs read and write trace */
 
-kprobe:vfs_read
+kretprobe:vfs_read
 / cgroup == @tracked_cgid && comm == @tracked_comm /
 {
   $ret = (ssize_t)args4;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
 }
 
-kprobe:vfs_write
+kretprobe:vfs_write
 / cgroup == @tracked_cgid && comm == @tracked_comm /
 {
   $ret = (ssize_t)args4;

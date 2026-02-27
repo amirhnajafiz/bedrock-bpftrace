@@ -21,14 +21,14 @@ kprobe:vfs_write
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
 }
 {% else %}
-kprobe:vfs_read
+kretprobe:vfs_read
 {{ filter }}
 {
   $ret = (ssize_t)args4;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
 }
 
-kprobe:vfs_write
+kretprobe:vfs_write
 {{ filter }}
 {
   $ret = (ssize_t)args4;
