@@ -1,7 +1,7 @@
 {{ begin_section }}
 /* vfs read and write trace */
 {% if capture_metadata %}
-kfunc:vfs_read
+kprobe:vfs_read
 {{ filter }}
 {
   $file = (struct file *)args0;
@@ -11,7 +11,7 @@ kfunc:vfs_read
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
 }
 
-kfunc:vfs_write
+kprobe:vfs_write
 {{ filter }}
 {
   $file = (struct file *)args0;
@@ -21,14 +21,14 @@ kfunc:vfs_write
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
 }
 {% else %}
-kfunc:vfs_read
+kprobe:vfs_read
 {{ filter }}
 {
   $ret = (ssize_t)args4;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
 }
 
-kfunc:vfs_write
+kprobe:vfs_write
 {{ filter }}
 {
   $ret = (ssize_t)args4;

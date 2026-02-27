@@ -7,14 +7,14 @@ BEGIN
 }
 /* vfs read and write trace */
 
-kfunc:vfs_read
+kprobe:vfs_read
 / cgroup == @tracked_cgid /
 {
   $ret = (ssize_t)args4;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, $ret);
 }
 
-kfunc:vfs_write
+kprobe:vfs_write
 / cgroup == @tracked_cgid /
 {
   $ret = (ssize_t)args4;

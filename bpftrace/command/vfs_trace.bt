@@ -44,7 +44,7 @@ tracepoint:sched:sched_process_exit
 }
 /* vfs read and write trace */
 
-kfunc:vfs_read
+kprobe:vfs_read
 / @tracked[(int64)pid] /
 {
   $file = (struct file *)args0;
@@ -54,7 +54,7 @@ kfunc:vfs_read
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%llu, ret=%d}\n", nsecs, pid, tid, comm, $file->f_path.dentry->d_name.name, $count, $pos, $ret);
 }
 
-kfunc:vfs_write
+kprobe:vfs_write
 / @tracked[(int64)pid] /
 {
   $file = (struct file *)args0;
