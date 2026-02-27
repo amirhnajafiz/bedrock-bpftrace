@@ -14,9 +14,14 @@ if [ ! -d "$BASE_DIR" ]; then
     exit 1
 fi
 
-# Dry-run mode (older versions of bpftrace may use --dd, newer versions use --dry-run)
-DDRY_RUN_MODE="--dry-run"
-[ "$(bpftrace --help | grep -E -- '--dry-run|--dd')" ] && DDRY_RUN_MODE="--dry-run" || DDRY_RUN_MODE="--dd"
+# Dry-run mode (older versions of bpftrace may use -dd, newer versions use --dry-run)
+DDRY_RUN_MODE=""
+[ "$(bpftrace --help | grep -E -- '--dry-run|-dd')" ] && DDRY_RUN_MODE="--dry-run" || DDRY_RUN_MODE="-dd"
+
+[ -DDRY_RUN_MODE ] || {
+    echo "[ERROR] bpftrace does not support dry-run mode on this system"
+    exit 1
+}
 
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
     echo "[INFO] Testing: ${script_path}"
