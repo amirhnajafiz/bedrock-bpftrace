@@ -14,13 +14,17 @@ if [ ! -d "$BASE_DIR" ]; then
     exit 1
 fi
 
+# Dry-run mode (older versions of bpftrace may use --dd, newer versions use --dry-run)
+DDRY_RUN_MODE="--dry-run"
+[ "$(bpftrace --help | grep -E -- '--dry-run|--dd')" ] && DDRY_RUN_MODE="--dry-run" || DDRY_RUN_MODE="--dd"
+
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
     echo "[INFO] Testing: ${script_path}"
 
     parent_dir="$(dirname "$script_path")"
 
     if [ -x "$parent_dir" ]; then
-        err_output=$(bpftrace --dry-run -c "ls" "$script_path" 2>&1 >/dev/null) || {
+        err_output=$(bpftrace "$DDRY_RUN_MODE" -c "ls" "$script_path" 2>&1 >/dev/null) || {
             echo "[ERROR] Dry-run failed for: ${script_path}"
             echo "[ERROR] bpftrace error output:"
             echo "---------"
@@ -29,7 +33,7 @@ find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
             exit 1
         }
     else
-        err_output=$(bpftrace --dry-run "$script_path" 2>&1 >/dev/null) || {
+        err_output=$(bpftrace "$DDRY_RUN_MODE" "$script_path" 2>&1 >/dev/null) || {
             echo "[ERROR] Dry-run failed for: ${script_path}"
             echo "[ERROR] bpftrace error output:"
             echo "---------"
