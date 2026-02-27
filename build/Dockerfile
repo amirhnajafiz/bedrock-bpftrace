@@ -8,6 +8,7 @@ ENV LIBBPF_VERSION=v1.5.0
 ENV BPFTRACE_VERSION=v0.24.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    linux-tools-generic \
     libbpfcc-dev \
     bpfcc-tools \
     libcereal-dev \
@@ -76,10 +77,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libdw1 \
     libseccomp2 \
-    libbcc \
+    libbpfcc-dev \
+    bpfcc-tools \
     kmod \
     procps \
     ca-certificates \
+    clang-18 \
+    libclang-18-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local /usr/local
