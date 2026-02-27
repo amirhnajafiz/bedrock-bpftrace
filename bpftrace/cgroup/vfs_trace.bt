@@ -24,3 +24,16 @@ kfunc:vfs_write
   $pos = args->pos;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
+
+
+kretfunc:vfs_read
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_write
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}

@@ -8,16 +8,15 @@ BEGIN
 }
 /* vfs read and write trace */
 
-kfunc:vfs_read
+
+kretfunc:vfs_read
 / cgroup == @tracked_cgid && comm == @tracked_comm /
 {
-  $count = args->count;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{count=%d}\n", nsecs, pid, tid, comm, $count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }
 
-kfunc:vfs_write
+kretfunc:vfs_write
 / cgroup == @tracked_cgid && comm == @tracked_comm /
 {
-  $count = args->count;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{count=%d}\n", nsecs, pid, tid, comm, $count);
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }
