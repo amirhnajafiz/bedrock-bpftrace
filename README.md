@@ -1,13 +1,17 @@
 # Bedrock BPFtrace
 
-Bedrock BPFtrace is a repository of bpftrace scripts used by the Bedrock tracer. All tracing scripts are generated from Python + Jinja2 templates and exported in .bt format.
+**Bedrock BPFtrace** is the repository that contains bpftrace scripts used by the Bedrock tracer. All tracing scripts are generated using Python and Jinja2 templates. Tracing files are exported in `.bt` format. They can also be used directly by `bpftrace` cli. But, the main role of this repository is for [/amirhnajafiz/bedrock-tracer](https://github.com/amirhnajafiz/bedrock-tracer) that clones this repositroy to use it within it's tracing logic.
 
 ## Requirements
+
+Make sure to have the following tools installed on your machine if you plan to use the bt scripts with `bpftrace` cli.
 
 * libbpf v1.5.0+
 * bpftrace v0.24.0+
 * python3
 * python3-venv
+
+However, for easier compatibility, we have a Dockerfile that you can build and use to not messup your system environemnt. You can use the `tests/docker_build.sh` as an example to build the image and use it. As future task, we might add a docker image globaly to use Bedrock BPFTrace in containers.
 
 ## Overview
 
@@ -15,13 +19,26 @@ This repository contains the BPFtrace programs required for Bedrock’s tracing 
 
 ## Installation & Script Generation
 
-After cloning the repository, generate the tracing scripts with:
+The bt scripts exist in `bpftrace` directory. So you don't actully need to setup anything if yo have all the requirements. But if you need to have full dependencies to rewrite the scripts or run them on your platform follow next two steps.
+
+### with requirements
+
+After cloning the repository, setup requiresments and regenerate the tracing scripts with:
 
 ```sh
+make setup
 make
 ```
 
 > Make sure to have Python3 and Python-venv installed on your machine.
+
+### without requirements
+
+If you don't want to have libbpf and bpftrace install, you can just regenerate the scripts:
+
+```sh
+make
+```
 
 Once completed, the generated .bt files will be available in the bpftrace/ directory.
 

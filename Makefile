@@ -7,7 +7,7 @@ VENV_PIP := $(VENV_DIR)/bin/pip
 
 all: generate
 
-setup: deps
+setup: bpftrace
 
 bpftrace:
 	sudo ./install-bpftrace.sh
