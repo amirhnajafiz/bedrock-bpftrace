@@ -1,74 +1,106 @@
 # Bedrock BPFtrace
 
-**Bedrock BPFtrace** is the repository that contains bpftrace scripts used by the Bedrock tracer. All tracing scripts are generated using Python and Jinja2 templates. Tracing files are exported in `.bt` format. They can also be used directly by `bpftrace` cli. But, the main role of this repository is for [/amirhnajafiz/bedrock-tracer](https://github.com/amirhnajafiz/bedrock-tracer) that clones this repositroy to use it within it's tracing logic.
+[![License](https://img.shields.io/github/license/amirhnajafiz/bedrock-bpftrace?color=blue)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/releases)
 
-## Requirements
+**Bedrock BPFtrace** provides ready-to-use and templated [BPFtrace](https://github.com/iovisor/bpftrace) scripts used by the [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer). All scripts are generated from **Python (Jinja2)** templates and compiled into `.bt` tracing programs.
 
-Make sure to have the following tools installed on your machine if you plan to use the bt scripts with `bpftrace` cli.
+## ✨ Overview
 
-* libbpf v1.5.0+
-* bpftrace v0.24.0+
-* python3
-* python3-venv
+Bedrock BPFtrace delivers the dynamic tracing layer for Bedrock’s observability stack, offering rich visibility into file system, network, and process-level I/O.  
 
-However, for easier compatibility, we have a Dockerfile that you can build and use to not messup your system environemnt. You can use the `tests/docker_build.sh` as an example to build the image and use it. As future task, we might add a docker image globaly to use Bedrock BPFTrace in containers.
+Scripts are auto-generated and located under the `bpftrace/` directory, making them compatible with the `bpftrace` CLI or Bedrock Tracer runtime.
 
-## Overview
+## 🧰 Requirements
 
-This repository contains the BPFtrace programs required for Bedrock’s tracing engine. Templates are written in Python using Jinja2 and compiled into ready-to-run .bt scripts.
+To use `.bt` scripts directly with `bpftrace`, install:
 
-## Installation & Script Generation
+- **libbpf** ≥ v1.5.0  
+- **bpftrace** ≥ v0.24.0  
+- **python3**  
+- **python3-venv**
 
-The bt scripts exist in `bpftrace` directory. So you don't actully need to setup anything if yo have all the requirements. But if you need to have full dependencies to rewrite the scripts or run them on your platform follow next two steps.
+Alternatively, you can use the included **Docker environment** for isolated builds.
 
-### with requirements
+```bash
+# Example: Build Docker image for Bedrock BPFtrace
+bash tests/docker_build.sh
+```
 
-After cloning the repository, setup requiresments and regenerate the tracing scripts with:
+*Future releases may include a public prebuilt container image for direct use.*
 
-```sh
+## ⚙️ Installation & Script Generation
+
+Scripts are already pre-generated under `bpftrace/`.  
+If you want to modify templates or regenerate everything, choose one of the options below:
+
+### Option 1 — Full setup (with all dependencies)
+
+```bash
 make setup
 make
 ```
 
-> Make sure to have Python3 and Python-venv installed on your machine.
+> Ensure Python 3 and `python3-venv` are installed.
 
-### without requirements
+### Option 2 — Lightweight regeneration (no system dependencies)
 
-If you don't want to have libbpf and bpftrace install, you can just regenerate the scripts:
-
-```sh
+```bash
 make
 ```
 
-Once completed, the generated .bt files will be available in the bpftrace/ directory.
+After successful execution, all generated `.bt` files will appear in `bpftrace/`.
 
-## Script Categories
+## 🔍 Script Categories
 
-The repository generates tracing scripts across five categories:
+Bedrock BPFtrace generates tracing scripts across the following categories:
 
-* Tracing by PID
-* Tracing by process name (command)
-* Execute and trace a command
-* Tracing by cgroup
-* Tracing by process name within a cgroup
+- Trace by **PID**
+- Trace by **process name (command)**
+- **Execute and trace** a command
+- Trace by **cgroup**
+- Trace by **process name within a cgroup**
 
-Each category includes two tracing modes:
+Each category supports multiple tracing types:
 
-1. Basic I/O tracing: Tracks standard I/O operations such as read and write.
-2. Memory-mapped I/O tracing: Tracks I/O operations performed via memory mapping.
+1. **File System I/O Tracing** — High-level VFS read/write tracking.  
+2. **Basic I/O Tracing** — Standard read/write tracing with file path visibility (moderate overhead).  
+3. **Memory-Mapped I/O Tracing** — Detailed operations via memory mapping (higher overhead, verbose output).
 
-### Silent Mode
+## 🧠 Headless Mode
 
-A silent mode is also available. When enabled, metadata collection is omitted to reduce log volume. This mode is useful for high-level I/O monitoring where detailed file access patterns are not required.
+A **headless mode** is available for reduced log size and overhead.  
+In this mode, metadata collection is skipped—useful for system-wide I/O summaries and performance-focused tracing runs.
 
-## Tracing Events
+## 🪶 Log Format
 
-Read more about the tracing events in [EVENTS.md](EVENTS.md).
+The output produced by BPFtrace scripts follows a structured format for easy parsing:
 
-## Format
-
-The output logs have the following format:
-
-```txt
-[timestamp] {pid=[pid] tid=[tid] proc=[command]}{[EN|EX] [operand]}{[key=value]}
+```text
+[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [EN|EX] [operand] } { [key=value] }
 ```
+
+Example:
+
+```text
+[171243.918] {pid=4123 tid=4123 proc=nginx}{EN read}{fd=5 file=/var/log/access.log}
+```
+
+## 📚 Tracing Events
+
+A detailed specification of all event types is available in [EVENTS.md](EVENTS.md).
+
+## 🧩 Related Projects
+
+- [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer) — Core tracing engine using Bedrock BPFtrace scripts.
+- [bpftrace](https://github.com/iovisor/bpftrace) — BPF-based tracing CLI tool built on libbpf.
+
+## 🤝 Contributing
+
+Contributions are welcome! Fork this repository, open a pull request, or file an issue to report bugs or request new features.
+
+Please follow the project’s code and documentation style for consistency.
+
+## 📄 License
+
+This project is licensed under the [Apache License](LICENSE).
