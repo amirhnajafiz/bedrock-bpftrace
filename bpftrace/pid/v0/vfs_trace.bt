@@ -60,7 +60,7 @@ kfunc:vfs_readv
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_readv}{fname=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
-kfunc:vfs_writew
+kfunc:vfs_writev
 / @tracked[pid] /
 {
   $file = args->file;

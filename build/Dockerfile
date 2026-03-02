@@ -104,6 +104,7 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libbpf* /usr/lib/x86_64-linux-gnu/
 WORKDIR /usr/local/bedrock
 
 # Copy the bpftrace scripts and kernel support check script to the runtime image
-COPY bpftrace/ tests/bt_scripts.sh tests/kernel_support.sh ./
+COPY bpftrace/ ./bpftrace
+COPY tests/bt_scripts.sh tests/kernel_support.sh ./
 
 CMD ["/bin/bash"]
