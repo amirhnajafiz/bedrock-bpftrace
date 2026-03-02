@@ -105,6 +105,17 @@ Example:
 [171245.200] {pid=4123 tid=4123 proc=nginx}{read}{fd=5, fname=/var/log/access.log, duration=11, ret=500}
 ```
 
+### common keys
+
+Here is a list of keys that you will get as `[key=value]` pairs.
+
+- `fname` : file name (could be absolute path too)
+- `ret` : return value
+- `fd` : file descriptor
+- `count` : number of data bytes
+- `duration` : latency in nano-seconds
+- `addr` : memory address
+
 ## 📚 Tracing Events
 
 A detailed specification of all event types is available in [EVENTS.md](EVENTS.md).

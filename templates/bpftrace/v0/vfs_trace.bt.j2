@@ -8,7 +8,7 @@ kfunc:vfs_read
   $file = args->file;
   $count = args->count;
   $pos = args->pos;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{fname=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
 kfunc:vfs_write
@@ -17,7 +17,7 @@ kfunc:vfs_write
   $file = args->file;
   $count = args->count;
   $pos = args->pos;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{fname=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
 kfunc:vfs_readv
@@ -26,7 +26,7 @@ kfunc:vfs_readv
   $file = args->file;
   $count = args->vlen;
   $pos = args->pos;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_readv}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_readv}{fname=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
 kfunc:vfs_writew
@@ -35,7 +35,7 @@ kfunc:vfs_writew
   $file = args->file;
   $count = args->vlen;
   $pos = args->pos;
-  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_writev}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_writev}{fname=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 {% endif %}
 

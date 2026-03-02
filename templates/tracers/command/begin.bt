@@ -11,7 +11,7 @@ BEGIN
 tracepoint:sched:sched_process_fork
 / comm == @tracked_comm || @tracked[args->parent_pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
+  printf("%llu {pid=%d tid=%d proc=%s}{fork}{pid=%d, comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
   @tracked[args->child_pid] = 1;
 }
 
@@ -19,7 +19,7 @@ tracepoint:sched:sched_process_fork
 tracepoint:sched:sched_process_exec
 / comm == @tracked_comm || @tracked[args->old_pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN exec}{pid=%d fname=%s}\n", nsecs, args->old_pid, tid, comm, args->pid, str(args->filename));
+  printf("%llu {pid=%d tid=%d proc=%s}{exec}{pid=%d, fname=%s}\n", nsecs, args->old_pid, tid, comm, args->pid, str(args->filename));
   @tracked[args->pid] = 1;
 }
 
@@ -27,6 +27,6 @@ tracepoint:sched:sched_process_exec
 tracepoint:sched:sched_process_exit
 / @tracked[(int64)pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EX process}{}\n", nsecs, pid, tid, comm);
+  printf("%llu {pid=%d tid=%d proc=%s}{exit}{}\n", nsecs, pid, tid, comm);
   delete(@tracked[(int64)pid]);
 }
