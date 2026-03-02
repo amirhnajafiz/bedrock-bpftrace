@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/github/license/amirhnajafiz/bedrock-bpftrace?color=blue)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/releases)
 [![Latest Tag](https://img.shields.io/github/v/tag/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/tags)
+![Image Size](https://img.shields.io/badge/image_size-861_MB-blue)
 
 **Bedrock BPFtrace** provides ready-to-use and templated [BPFtrace](https://github.com/iovisor/bpftrace) scripts used by the [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer). All scripts are generated from **Python (Jinja2)** templates and compiled into `.bt` tracing programs.
 
@@ -36,8 +37,9 @@ The container needs a host that supports eBPF (prefer BTF-enabled kernels). Also
 ```sh
 docker run --rm \
     --privileged \
-    --pid=host \ 
-    -v /sys:/sys -v /lib/modules:/lib/modules \
+    --pid=host \
+    -v /sys:/sys \
+    -v /lib/modules:/lib/modules \
     -it ghcr.io/amirhnajafiz/bedrock-bpftrace:latest
 ```
 
