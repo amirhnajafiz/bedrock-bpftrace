@@ -30,6 +30,7 @@ echo "[INFO] Total .bt scripts found: ${total_scripts}"
 # Run dry-run tests on each .bt script
 current_script=0
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
+    current_script=$((current_script + 1))
     echo "[INFO][${current_script}/${total_scripts}] Testing: ${script_path}"
 
     parent_dir="$(dirname "$script_path")"
