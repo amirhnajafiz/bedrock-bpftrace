@@ -94,4 +94,4 @@ WORKDIR /usr/local/app
 COPY bpftrace/ bpftrace/
 COPY tests/bt_scripts.sh bt_scripts.sh
 
-CMD ["./bt_scripts.sh", "/usr/local/app/bpftrace"]
+CMD ["/bin/bash"]

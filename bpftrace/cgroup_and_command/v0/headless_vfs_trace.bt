@@ -21,3 +21,15 @@ kretfunc:vfs_write
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }
+
+kretfunc:vfs_readv
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_readv}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_writev
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_writev}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}

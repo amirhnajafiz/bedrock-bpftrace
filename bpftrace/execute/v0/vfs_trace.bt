@@ -51,6 +51,24 @@ kfunc:vfs_write
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
 
+kfunc:vfs_readv
+/ @tracked[pid] /
+{
+  $file = args->file;
+  $count = args->vlen;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_readv}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+}
+
+kfunc:vfs_writew
+/ @tracked[pid] /
+{
+  $file = args->file;
+  $count = args->vlen;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_writev}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+}
+
 
 kretfunc:vfs_read
 / @tracked[pid] /
@@ -62,4 +80,16 @@ kretfunc:vfs_write
 / @tracked[pid] /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_readv
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_readv}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_writev
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_writev}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }

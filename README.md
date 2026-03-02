@@ -74,16 +74,35 @@ In this mode, metadata collection is skipped—useful for system-wide I/O summar
 
 ## 🪶 Log Format
 
-The output produced by BPFtrace scripts follows a structured format for easy parsing:
+The output produced by BPFtrace scripts follows a structured format for easy parsing.
+
+### v0 (old version)
+
+It requires grouping EN and EX entires.
 
 ```text
-[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [EN|EX] [operand] } { [key=value] }
+[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [EN|EX] [operand] } { [key=value], }
 ```
 
 Example:
 
 ```text
-[171243.918] {pid=4123 tid=4123 proc=nginx}{EN read}{fd=5 file=/var/log/access.log}
+[171243.918] {pid=4123 tid=4123 proc=nginx}{EN read}{fd=5, fname=/var/log/access.log}
+[171245.200] {pid=4123 tid=4123 proc=nginx}{EX read}{ret=500}
+```
+
+### v1
+
+By using ebpf maps, it groups the EN and EX events inside the bpftrace script.
+
+```text
+[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [operand] } { [key=value], }
+```
+
+Example:
+
+```text
+[171245.200] {pid=4123 tid=4123 proc=nginx}{read}{fd=5, fname=/var/log/access.log, duration=11, ret=500}
 ```
 
 ## 📚 Tracing Events

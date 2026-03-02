@@ -8,6 +8,8 @@ These probes hook directly into the Linux Virtual File System (VFS) layer for co
 
 - **vfs_read** — Reads data from a file system.  
 - **vfs_write** — Writes data into a file system.
+- **vfs_readv** — Reads data from a file system (vectorized I/O).  
+- **vfs_writev** — Writes data into a file system (vectorized I/O).
 
 ## 💾 I/O Operation Syscalls
 
