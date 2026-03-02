@@ -1,0 +1,258 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @fname[cpid, 0] = "STDIN";
+  @fname[cpid, 1] = "STDOUT";
+  @fname[cpid, 2] = "STDERR";
+  @tracked[cpid] = 1;
+  printf("%s START tracing events for CPID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), cpid);
+}
+
+/* ----- Child Process Tracing ----- */
+/* when we see a fork, if parent is tracked then also track child */
+tracepoint:sched:sched_process_fork
+/ @tracked[(uint64)args->parent_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[(uint64)args->child_pid] = 1;
+}
+
+/* when exec happens, if old_pid tracked ensure that the new pid is also tracked */
+tracepoint:sched:sched_process_exec
+/ @tracked[(uint64)args->old_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN exec}{pid=%d fname=%s}\n", nsecs, args->old_pid, tid, comm, args->pid, str(args->filename));
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[(uint64)args->pid] = 1;
+}
+
+/* cleanup process fname table and untrack process */
+tracepoint:sched:sched_process_exit
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX process}{}\n", nsecs, pid, tid, comm);
+
+  delete(@fname[pid, 0]);
+  delete(@fname[pid, 1]);
+  delete(@fname[pid, 2]);
+  delete(@tracked[pid]);
+}
+
+/* creat enter + exit */
+tracepoint:syscalls:sys_enter_creat
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->pathname);
+}
+
+tracepoint:syscalls:sys_exit_creat
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{creat}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* open enter + exit */
+tracepoint:syscalls:sys_enter_open
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->filename);
+}
+
+tracepoint:syscalls:sys_exit_open
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{open}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* openat enter + exit */
+tracepoint:syscalls:sys_enter_openat
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->filename);
+}
+
+tracepoint:syscalls:sys_exit_openat
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{openat}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* dup enter + exit */
+tracepoint:syscalls:sys_enter_dup
+/ @tracked[pid] /
+{
+  @fd[tid] = args->fildes;
+}
+
+tracepoint:syscalls:sys_exit_dup
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{dup}{fd=%d, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], args->ret);
+  delete(@fd[tid]);
+}
+
+/* dup2 enter + exit */
+tracepoint:syscalls:sys_enter_dup2
+/ @tracked[pid] /
+{
+  @fd[tid] = args->oldfd;
+  @newfd[tid] = args->newfd;
+}
+
+tracepoint:syscalls:sys_exit_dup2
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{dup2}{oldfd=%d, newfd=%d, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @newfd[tid], args->ret);
+  delete(@fd[tid]);
+  delete(@newfd[tid]);
+}
+
+/* dup3 enter + exit */
+tracepoint:syscalls:sys_enter_dup3
+/ @tracked[pid] /
+{
+  @fd[tid] = args->oldfd;
+  @newfd[tid] = args->newfd;
+}
+
+tracepoint:syscalls:sys_exit_dup3
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{dup3}{oldfd=%d, newfd=%d, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @newfd[tid], args->ret);
+  delete(@fd[tid]);
+  delete(@newfd[tid]);
+}
+
+/* statfs enter + exit */
+tracepoint:syscalls:sys_enter_statfs
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->pathname);
+}
+
+tracepoint:syscalls:sys_exit_statfs
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{statfs}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* statx enter + exit */
+tracepoint:syscalls:sys_enter_statx
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->filename);
+}
+
+tracepoint:syscalls:sys_exit_statx
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{statx}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* newstat enter + exit */
+tracepoint:syscalls:sys_enter_newstat
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->filename);
+}
+
+tracepoint:syscalls:sys_exit_newstat
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{newstat}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* newlstat enter + exit */
+tracepoint:syscalls:sys_enter_newlstat
+/ @tracked[pid] /
+{
+  @fname[tid] = str(args->filename);
+}
+
+tracepoint:syscalls:sys_exit_newlstat
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{newlstat}{fname=%s, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], args->ret);
+  delete(@fname[tid]);
+}
+
+/* close enter + exit */
+tracepoint:syscalls:sys_enter_close
+/ @tracked[pid] /
+{
+  @fd[tid] = args->fd;
+}
+
+tracepoint:syscalls:sys_exit_close
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{close}{fd=%d, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], args->ret);
+  delete(@fd[tid]);
+}
+
+
+/* mmap enter + exit */
+tracepoint:syscalls:sys_enter_mmap
+/ @tracked[pid] /
+{
+  @fd[tid] = args->fd;
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
+}
+
+tracepoint:syscalls:sys_exit_mmap
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{mmap}{fd=%d, addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @fd[tid], @addr[tid], @len[tid], args->ret);
+  delete(@fd[tid]);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* munmap enter + exit */
+tracepoint:syscalls:sys_enter_munmap
+/ @tracked[pid] /
+{
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
+}
+
+tracepoint:syscalls:sys_exit_munmap
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{munmap}{addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @addr[tid], @len[tid], args->ret);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* page fault user */
+tracepoint:exceptions:page_fault_user
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @addr[tid] = args->address;
+  @erec[tid] = 1;
+}
+
+kretfunc:handle_mm_fault
+/ @erec[tid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{page_fault_user}{addr=%lu, duration=%llu}\n", nsecs, pid, tid, comm, @addr[tid], nsecs - @start[tid]);
+  delete(@erec[tid]);
+  delete(@start[tid]);
+  delete(@addr[tid]);
+}

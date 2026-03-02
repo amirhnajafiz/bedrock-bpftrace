@@ -1,8 +1,15 @@
-{{ begin_section }}
-/* vfs read and write trace */
-{% if capture_metadata %}
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @tracked_cgid = (uint64)$1;
+  printf("%s START tracing events for CGROUP ID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
+}
+
+/* vfs read/readv and write/writev trace */
+
 kfunc:vfs_read
-{{ filter }}
+/ cgroup == @tracked_cgid /
 {
   $file = args->file;
   $count = args->count;
@@ -11,23 +18,23 @@ kfunc:vfs_read
 }
 
 kfunc:vfs_write
-{{ filter }}
+/ cgroup == @tracked_cgid /
 {
   $file = args->file;
   $count = args->count;
   $pos = args->pos;
   printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
 }
-{% endif %}
+
 
 kretfunc:vfs_read
-{{ filter }}
+/ cgroup == @tracked_cgid /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }
 
 kretfunc:vfs_write
-{{ filter }}
+/ cgroup == @tracked_cgid /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
 }

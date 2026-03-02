@@ -80,6 +80,8 @@ if __name__ == "__main__":
         output_dir_path = os.path.join(cfg["outputs_dir"], entry)
 
         os.makedirs(output_dir_path, exist_ok=True)
+        os.makedirs(os.path.join(output_dir_path, "v0"), exist_ok=True)
+        os.makedirs(os.path.join(output_dir_path, "v1"), exist_ok=True)
 
         # read inputs
         filter_section = read_to_str(filter_path)
@@ -106,7 +108,9 @@ if __name__ == "__main__":
 
             logging.info(f"template saved: {output_path}")
 
-            output_path = os.path.join(output_dir_path, "headless_" + out)
+            parts = out.split("/")
+            new_out = parts[0] + "/headless_" + parts[1]
+            output_path = os.path.join(output_dir_path, new_out)
             tmp = read_template(template_path)
 
             res = tmp.render(

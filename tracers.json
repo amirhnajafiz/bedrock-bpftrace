@@ -4,9 +4,12 @@
     "inputs_dir": "tracers",
     "outputs_dir": "bpftrace",
     "sources": [
-        "io_trace.bt",
-        "memory_trace.bt",
-        "vfs_trace.bt"
+        "v0/io_trace.bt",
+        "v0/memory_trace.bt",
+        "v0/vfs_trace.bt",
+        "v1/io_trace.bt",
+        "v1/memory_trace.bt",
+        "v1/vfs_trace.bt"
     ],
     "inputs": [
        "cgroup",

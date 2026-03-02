@@ -42,17 +42,56 @@ tracepoint:sched:sched_process_exit
   delete(@fname[pid, 2]);
   delete(@tracked[(int64)pid]);
 }
-/* vfs read and write trace */
 
 
-kretfunc:vfs_read
+/* mmap enter + exit */
+tracepoint:syscalls:sys_enter_mmap
 / @tracked[(int64)pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+  @fd[tid] = args->fd;
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
 }
 
-kretfunc:vfs_write
+tracepoint:syscalls:sys_exit_mmap
 / @tracked[(int64)pid] /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+  printf("%llu {pid=%d tid=%d proc=%s}{mmap}{fd=%d, addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @fd[tid], @addr[tid], @len[tid], args->ret);
+  delete(@fd[tid]);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* munmap enter + exit */
+tracepoint:syscalls:sys_enter_munmap
+/ @tracked[(int64)pid] /
+{
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
+}
+
+tracepoint:syscalls:sys_exit_munmap
+/ @tracked[(int64)pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{munmap}{addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @addr[tid], @len[tid], args->ret);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* page fault user */
+tracepoint:exceptions:page_fault_user
+/ @tracked[(int64)pid] /
+{
+  @start[tid] = nsecs;
+  @addr[tid] = args->address;
+  @erec[tid] = 1;
+}
+
+kretfunc:handle_mm_fault
+/ @erec[tid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{page_fault_user}{addr=%lu, duration=%llu}\n", nsecs, pid, tid, comm, @addr[tid], nsecs - @start[tid]);
+  delete(@erec[tid]);
+  delete(@start[tid]);
+  delete(@addr[tid]);
 }

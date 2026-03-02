@@ -1,0 +1,104 @@
+{{ begin_section }}
+
+/* vfs read/readv and write/writev trace */
+{% if capture_metadata %}
+kfunc:vfs_read
+{{ filter }}
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->count;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_read
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_read}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_write
+{{ filter }}
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->count;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_write
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_write}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_readv
+{{ filter }}
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->vlen;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_readv
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_readv}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_writev
+{{ filter }}
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->vlen;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_writev
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_writev}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+{% else %}
+kretfunc:vfs_read
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_write
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_readv
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_readv}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_writev
+{{ filter }}
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_writev}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+{% endif %}

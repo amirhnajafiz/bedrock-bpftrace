@@ -1,0 +1,61 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @tracked_cgid = (uint64)$1;
+  @tracked_comm = str($2);
+  printf("%s START tracing events for CGROUP ID %llu (filter command: %s)\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1, str($2));
+}
+
+
+/* mmap enter + exit */
+tracepoint:syscalls:sys_enter_mmap
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  @fd[tid] = args->fd;
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
+}
+
+tracepoint:syscalls:sys_exit_mmap
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{mmap}{fd=%d, addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @fd[tid], @addr[tid], @len[tid], args->ret);
+  delete(@fd[tid]);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* munmap enter + exit */
+tracepoint:syscalls:sys_enter_munmap
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  @addr[tid] = args->addr;
+  @len[tid] = args->len;
+}
+
+tracepoint:syscalls:sys_exit_munmap
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{munmap}{addr=%lu, len=%lu, ret=%lu}\n", nsecs, pid, tid, comm, @addr[tid], @len[tid], args->ret);
+  delete(@addr[tid]);
+  delete(@len[tid]);
+}
+
+/* page fault user */
+tracepoint:exceptions:page_fault_user
+/ cgroup == @tracked_cgid && comm == @tracked_comm /
+{
+  @start[tid] = nsecs;
+  @addr[tid] = args->address;
+  @erec[tid] = 1;
+}
+
+kretfunc:handle_mm_fault
+/ @erec[tid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{page_fault_user}{addr=%lu, duration=%llu}\n", nsecs, pid, tid, comm, @addr[tid], nsecs - @start[tid]);
+  delete(@erec[tid]);
+  delete(@start[tid]);
+  delete(@addr[tid]);
+}

@@ -1,0 +1,192 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @fname[cpid, 0] = "STDIN";
+  @fname[cpid, 1] = "STDOUT";
+  @fname[cpid, 2] = "STDERR";
+  @tracked[cpid] = 1;
+  printf("%s START tracing events for CPID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), cpid);
+}
+
+/* ----- Child Process Tracing ----- */
+/* when we see a fork, if parent is tracked then also track child */
+tracepoint:sched:sched_process_fork
+/ @tracked[(uint64)args->parent_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[(uint64)args->child_pid] = 1;
+}
+
+/* when exec happens, if old_pid tracked ensure that the new pid is also tracked */
+tracepoint:sched:sched_process_exec
+/ @tracked[(uint64)args->old_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN exec}{pid=%d fname=%s}\n", nsecs, args->old_pid, tid, comm, args->pid, str(args->filename));
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[(uint64)args->pid] = 1;
+}
+
+/* cleanup process fname table and untrack process */
+tracepoint:sched:sched_process_exit
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX process}{}\n", nsecs, pid, tid, comm);
+
+  delete(@fname[pid, 0]);
+  delete(@fname[pid, 1]);
+  delete(@fname[pid, 2]);
+  delete(@tracked[pid]);
+}
+
+
+/* read enter + exit */
+tracepoint:syscalls:sys_enter_read
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->count;
+}
+
+tracepoint:syscalls:sys_exit_read
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{read}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* write enter + exit */
+tracepoint:syscalls:sys_enter_write
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->count;
+}
+
+tracepoint:syscalls:sys_exit_write
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{write}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* pread64 enter + exit */
+tracepoint:syscalls:sys_enter_pread64
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->count;
+}
+
+tracepoint:syscalls:sys_exit_pread64
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{pread64}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* pwrite64 enter + exit */
+tracepoint:syscalls:sys_enter_pwrite64
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->count;
+}
+
+tracepoint:syscalls:sys_exit_pwrite64
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{pwrite64}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* readv enter + exit */
+tracepoint:syscalls:sys_enter_readv
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->vlen;
+}
+
+tracepoint:syscalls:sys_exit_readv
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{readv}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* writev enter + exit */
+tracepoint:syscalls:sys_enter_writev
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->vlen;
+}
+
+tracepoint:syscalls:sys_exit_writev
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{writev}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* preadv enter + exit */
+tracepoint:syscalls:sys_enter_preadv
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->vlen;
+}
+
+tracepoint:syscalls:sys_exit_preadv
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{preadv}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}
+
+/* pwritev enter + exit */
+tracepoint:syscalls:sys_enter_pwritev
+/ @tracked[pid] /
+{
+  @start[tid] = nsecs;
+  @fd[tid] = args->fd;
+  @count[tid] = args->vlen;
+}
+
+tracepoint:syscalls:sys_exit_pwritev
+/ @tracked[pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{pwritev}{fd=%d, count=%d, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fd[tid], @count[tid], nsecs - @start[tid], args->ret);
+  delete(@start[tid]);
+  delete(@fd[tid]);
+  delete(@count[tid]);
+}

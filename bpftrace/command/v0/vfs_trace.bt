@@ -1,0 +1,77 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @tracked_comm = str($1);
+  printf("%s START tracing events (filter command: %s)\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), str($1));
+}
+
+/* ----- Child Process Tracing ----- */
+/* when we see a fork, if parent is tracked then also track child */
+tracepoint:sched:sched_process_fork
+/ comm == @tracked_comm || @tracked[args->parent_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN fork}{pid=%d comm=%s}\n", nsecs, args->parent_pid, tid, args->parent_comm, args->child_pid, args->child_comm);
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[args->child_pid] = 1;
+}
+
+/* when exec happens, if old_pid tracked ensure that the new pid is also tracked */
+tracepoint:sched:sched_process_exec
+/ comm == @tracked_comm || @tracked[args->old_pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EN exec}{pid=%d fname=%s}\n", nsecs, args->old_pid, tid, comm, args->pid, str(args->filename));
+
+  @fname[pid, 0] = "STDIN";
+  @fname[pid, 1] = "STDOUT";
+  @fname[pid, 2] = "STDERR";
+  @tracked[args->pid] = 1;
+}
+
+/* cleanup process fname table and untrack process */
+tracepoint:sched:sched_process_exit
+/ @tracked[(int64)pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX process}{}\n", nsecs, pid, tid, comm);
+
+  delete(@fname[pid, 0]);
+  delete(@fname[pid, 1]);
+  delete(@fname[pid, 2]);
+  delete(@tracked[(int64)pid]);
+}
+
+/* vfs read/readv and write/writev trace */
+
+kfunc:vfs_read
+/ @tracked[(int64)pid] /
+{
+  $file = args->file;
+  $count = args->count;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_read}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+}
+
+kfunc:vfs_write
+/ @tracked[(int64)pid] /
+{
+  $file = args->file;
+  $count = args->count;
+  $pos = args->pos;
+  printf("%llu {pid=%d tid=%d proc=%s}{EN vfs_write}{file=%s, count=%d, position=%lx}\n", nsecs, pid, tid, comm, str($file->f_path.dentry->d_name.name), $count, $pos);
+}
+
+
+kretfunc:vfs_read
+/ @tracked[(int64)pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_read}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}
+
+kretfunc:vfs_write
+/ @tracked[(int64)pid] /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{EX vfs_write}{ret=%d}\n", nsecs, pid, tid, comm, retval);
+}

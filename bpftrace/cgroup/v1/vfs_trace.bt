@@ -1,0 +1,85 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+  @tracked_cgid = (uint64)$1;
+  printf("%s START tracing events for CGROUP ID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
+}
+
+/* vfs read/readv and write/writev trace */
+
+kfunc:vfs_read
+/ cgroup == @tracked_cgid /
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->count;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_read
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_read}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_write
+/ cgroup == @tracked_cgid /
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->count;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_write
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_write}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_readv
+/ cgroup == @tracked_cgid /
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->vlen;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_readv
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_readv}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}
+
+kfunc:vfs_writev
+/ cgroup == @tracked_cgid /
+{
+  @start[tid] = nsecs;
+  @fname[tid] = str(args->file->f_path.dentry->d_name.name);
+  @count[tid] = args->vlen;
+  @pos[tid] = args->pos;
+}
+
+kretfunc:vfs_writev
+/ cgroup == @tracked_cgid /
+{
+  printf("%llu {pid=%d tid=%d proc=%s}{vfs_writev}{fname=%s, count=%d, position=%lx, duration=%llu, ret=%d}\n", nsecs, pid, tid, comm, @fname[tid], @count[tid], @pos[tid], nsecs - @start[tid], retval);
+  delete(@start[tid]);
+  delete(@fname[tid]);
+  delete(@count[tid]);
+  delete(@pos[tid]);
+}

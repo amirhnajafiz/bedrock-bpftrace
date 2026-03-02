@@ -2,11 +2,11 @@
 
 BEGIN
 {
-  @fname[cpid, 0] = "STDIN";
-  @fname[cpid, 1] = "STDOUT";
-  @fname[cpid, 2] = "STDERR";
-  @tracked[cpid] = 1;
-  printf("%s START tracing events for CPID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), cpid);
+  @fname[(uint64)$1, 0] = "STDIN";
+  @fname[(uint64)$1, 1] = "STDOUT";
+  @fname[(uint64)$1, 2] = "STDERR";
+  @tracked[(uint64)$1] = 1;
+  printf("%s START tracing events for PID %llu\n", strftime("%Y-%m-%d %H:%M:%S", nsecs), $1);
 }
 
 /* ----- Child Process Tracing ----- */
@@ -45,7 +45,8 @@ tracepoint:sched:sched_process_exit
   delete(@fname[pid, 2]);
   delete(@tracked[pid]);
 }
-/* vfs read and write trace */
+
+/* vfs read/readv and write/writev trace */
 
 
 kretfunc:vfs_read
