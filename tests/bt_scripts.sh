@@ -23,8 +23,14 @@ DDRY_RUN_MODE=""
     exit 1
 }
 
+# Count total .bt files for progress tracking
+total_scripts=$(find "$BASE_DIR" -type f -name "*.bt" | wc -l)
+echo "[INFO] Total .bt scripts found: ${total_scripts}"
+
+# Run dry-run tests on each .bt script
+current_script=0
 find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
-    echo "[INFO] Testing: ${script_path}"
+    echo "[INFO][${current_script}/${total_scripts}] Testing: ${script_path}"
 
     parent_dir="$(dirname "$script_path")"
 
