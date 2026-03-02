@@ -65,6 +65,10 @@ $ sudo ./tests/kernel_support.sh
 
 The test scripts are also embedded in the docker image. You can find them under `/usr/local/bedrock` directory.
 
+- `bpftrace/` : contains the bedrock bpftrace scripts.
+- `bt_scripts.sh` : dry run testing to check bpftrace scripts.
+- `kernel_support.sh` : check the host kernel for bpftrace support.
+
 > NOTE: When you run the container in privileged mode, you don't need to run these tests with `sudo`.
 
 ## ⚙️ Installation & Script Generation
