@@ -34,7 +34,7 @@ The Bedrock BPFtrace has a base docker image that you can use. It already has **
 The container needs a host that supports eBPF (prefer BTF-enabled kernels). Also it requires privilege access to trace host processes.
 
 ```sh
-docker run \
+docker run --rm \
     --privileged \
     --pid=host \ 
     -v /sys:/sys -v /lib/modules:/lib/modules \
@@ -171,7 +171,7 @@ A detailed specification of all event types is available in [EVENTS.md](EVENTS.m
 
 Contributions are welcome! Fork this repository, open a pull request, or file an issue to report bugs or request new features.
 
-Please follow the project’s code and documentation style for consistency.
+Please follow the [project’s code and documentation style for consistency](DEV.md).
 
 ## 📄 License
 
