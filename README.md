@@ -1,7 +1,8 @@
 # Bedrock BPFtrace
 
 [![License](https://img.shields.io/github/license/amirhnajafiz/bedrock-bpftrace?color=blue)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/tag/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/releases)
+[![Latest Release](https://img.shields.io/github/v/release/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/releases)
+[![Latest Tag](https://img.shields.io/github/v/tag/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/tags)
 
 **Bedrock BPFtrace** provides ready-to-use and templated [BPFtrace](https://github.com/iovisor/bpftrace) scripts used by the [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer). All scripts are generated from **Python (Jinja2)** templates and compiled into `.bt` tracing programs.
 

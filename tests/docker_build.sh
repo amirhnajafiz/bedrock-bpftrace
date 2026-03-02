@@ -25,7 +25,7 @@ docker run \
     bedrock-bpftrace:test \
     bpftrace -c "ls" bpftrace/execute/vfs_trace.bt
 
-echo "[INFO] Cleaning up Docker image"
+echo "[OK] Cleaning up Docker image"
 docker rmi bedrock-bpftrace:test
 
-echo "[INFO] Docker tests completed successfully"
+echo "[SUCCESS] Docker tests completed successfully"

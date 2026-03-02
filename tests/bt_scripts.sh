@@ -57,4 +57,4 @@ find "$BASE_DIR" -type f -name "*.bt" | while read -r script_path; do
 
 done
 
-echo "[INFO] All .bt scripts passed successfully."
+echo "[SUCCESS] All .bt scripts passed successfully."
