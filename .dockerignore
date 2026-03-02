@@ -1,3 +1,4 @@
+.github/
 build/
 templates/
 
@@ -6,3 +7,5 @@ gen_bpftrace.py
 tracers.json
 Makefile
 requirements.txt
+EVENTS.md
+README.md

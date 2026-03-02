@@ -21,14 +21,51 @@ To use `.bt` scripts directly with `bpftrace`, install:
 - **python3**  
 - **python3-venv**
 
+### Install on Linux
+
+If you have an Ubuntu 24.04 machine, then you can run `install-bpftrace.sh` script to have **bpftrace** and **libbpf** installed.
+
+> WARN: This script may not work on all Linux machines/kernels. Using the docker image would be a safer solution.
+
+### Using with Docker
+
+The Bedrock BPFtrace has a base docker image that you can use. It already has **bpftrace**, **libbpf**, and **python3** installed.
+
+The container needs a host that supports eBPF (prefer BTF-enabled kernels). Also it requires privilege access to trace host processes.
+
+```sh
+docker run \
+    --privileged \
+    --pid=host \ 
+    -v /sys:/sys -v /lib/modules:/lib/modules \
+    -it ghcr.io/amirhnajafiz/bedrock-bpftrace:latest
+```
+
+> WARN: This may exploit security risks.
+
+#### local docker image build
+
 Alternatively, you can use the included **Docker environment** for isolated builds.
 
 ```bash
-# Example: Build Docker image for Bedrock BPFtrace
+# Build Docker image for Bedrock BPFtrace
 bash tests/docker_build.sh
 ```
 
-*Future releases may include a public prebuilt container image for direct use.*
+### Kernel Support
+
+To check if your machine is capable of running the bpftrace scripts, you can run the following kernel support check script:
+
+```sh
+$ sudo ./tests/kernel_support.sh
+[INFO] Kernel: 6.8.0-101-generic
+[OK] BTF detected
+[SUCCESS] Host is capable of running bpftrace scripts
+```
+
+The test scripts are also embedded in the docker image. You can find them under `/usr/local/bedrock` directory.
+
+> NOTE: When you run the container in privileged mode, you don't need to run these tests with `sudo`.
 
 ## ⚙️ Installation & Script Generation
 
@@ -77,7 +114,7 @@ In this mode, metadata collection is skipped—useful for system-wide I/O summar
 
 The output produced by BPFtrace scripts follows a structured format for easy parsing.
 
-### v0 (old version)
+### V0 (old version)
 
 It requires grouping EN and EX entires.
 
@@ -92,7 +129,7 @@ Example:
 [171245.200] {pid=4123 tid=4123 proc=nginx}{EX read}{ret=500}
 ```
 
-### v1
+### V1
 
 By using ebpf maps, it groups the EN and EX events inside the bpftrace script.
 
@@ -106,7 +143,7 @@ Example:
 [171245.200] {pid=4123 tid=4123 proc=nginx}{read}{fd=5, fname=/var/log/access.log, duration=11, ret=500}
 ```
 
-### common keys
+### Common Keys
 
 Here is a list of keys that you will get as `[key=value]` pairs.
 

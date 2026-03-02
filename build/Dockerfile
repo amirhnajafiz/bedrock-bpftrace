@@ -1,12 +1,14 @@
 # ============================
-# Stage 1 — Builder
+# Stage 1 — Builder (using Ubuntu 24.04)
 # ============================
 FROM ubuntu:24.04 AS builder
 
+# Set environment variables for non-interactive installation and versions of dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LIBBPF_VERSION=v1.5.0
 ENV BPFTRACE_VERSION=v0.24.0
 
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     linux-tools-generic \
     libbpfcc-dev \
@@ -44,6 +46,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Build libbpf
+# We need to build libbpf from source to ensure we have the latest version with all the necessary features for bpftrace.
+# The version of libbpf available in the Ubuntu 24.04 (v1.3.0) is older than the version required by bpftrace (v1.5.0),
+# which may cause compatibility issues.
 RUN git clone --depth 1 --branch ${LIBBPF_VERSION} \
     https://github.com/libbpf/libbpf.git /tmp/libbpf && \
     make -C /tmp/libbpf/src -j$(nproc) && \
@@ -51,6 +56,7 @@ RUN git clone --depth 1 --branch ${LIBBPF_VERSION} \
     rm -rf /tmp/libbpf
 
 # Build bpftrace
+# We need to build bpftrace from source to ensure we have the latest version with all the necessary features and bug fixes.
 RUN git clone --depth 1 --branch ${BPFTRACE_VERSION} \
     https://github.com/bpftrace/bpftrace.git /tmp/bpftrace && \
     cmake -S /tmp/bpftrace -B /tmp/bpftrace/build \
@@ -64,12 +70,14 @@ RUN git clone --depth 1 --branch ${BPFTRACE_VERSION} \
 
 
 # ============================
-# Stage 2 — Runtime
+# Stage 2 — Runtime (using Ubuntu 24.04)
 # ============================
 FROM ubuntu:24.04
 
+# Set environment variables for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libelf1 \
     zlib1g \
@@ -84,14 +92,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     clang-18 \
     libclang-18-dev \
+    wget \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy the built bpftrace binary and its dependencies from the builder stage
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libbpf* /usr/lib/x86_64-linux-gnu/
 
-WORKDIR /usr/local/app
+# Set the working directory for the runtime stage
+WORKDIR /usr/local/bedrock
 
-COPY bpftrace/ bpftrace/
-COPY tests/bt_scripts.sh bt_scripts.sh
+# Copy the bpftrace scripts and kernel support check script to the runtime image
+COPY bpftrace/ tests/bt_scripts.sh tests/kernel_support.sh ./
 
 CMD ["/bin/bash"]
