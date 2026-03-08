@@ -209,11 +209,26 @@ tracepoint:exceptions:page_fault_user
   @erec[tid] = 1;
 }
 
-kretfunc:handle_mm_fault
+kfunc:handle_mm_fault
 / @erec[tid] /
 {
+  $vm_file = ((struct vm_area_struct *)args->vma)->vm_file;
+  if ($vm_file) {
+    @is_file_fault[tid] = 1;
+  } else {
+    delete(@erec[tid]);
+    delete(@start[tid]);
+    delete(@addr[tid]);
+  }
+}
+
+kretfunc:handle_mm_fault
+/ @is_file_fault[tid] /
+{
   printf("%llu {pid=%d tid=%d proc=%s}{page_fault_user}{addr=%lu, duration=%llu}\n", nsecs, pid, tid, comm, @addr[tid], nsecs - @start[tid]);
+  
   delete(@erec[tid]);
+  delete(@is_file_fault[tid]);
   delete(@start[tid]);
   delete(@addr[tid]);
 }
