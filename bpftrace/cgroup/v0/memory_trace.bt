@@ -180,13 +180,28 @@ tracepoint:syscalls:sys_exit_munmap
 tracepoint:exceptions:page_fault_user
 / cgroup == @tracked_cgid /
 {
-  printf("%llu {pid=%d tid=%d proc=%s}{EN page_fault_user}{addr=%lu}\n", nsecs, pid, tid, comm, args->address);
+  @addr[tid] = args->address;
   @erec[tid] = 1;
 }
 
-kretfunc:handle_mm_fault
+kfunc:handle_mm_fault
 / @erec[tid] /
+{
+  $vm_file = ((struct vm_area_struct *)args->vma)->vm_file;
+  if ($vm_file) {
+    printf("%llu {pid=%d tid=%d proc=%s}{EN page_fault_user}{addr=%lu}\n", nsecs, pid, tid, comm, @addr[tid]);
+    @is_file_fault[tid] = 1;
+  } else {
+    delete(@erec[tid]);
+    delete(@addr[tid]);
+  }
+}
+
+kretfunc:handle_mm_fault
+/ @is_file_fault[tid] /
 {
   printf("%llu {pid=%d tid=%d proc=%s}{EX page_fault_user}{}\n", nsecs, pid, tid, comm);
   delete(@erec[tid]);
+  delete(@is_file_fault[tid]);
+  delete(@addr[tid]);
 }
