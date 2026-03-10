@@ -1,5 +1,3 @@
-#!/usr/bin/env bpftrace
-
 BEGIN
 {
   @tracked[cpid] = 1;

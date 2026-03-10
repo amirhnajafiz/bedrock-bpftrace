@@ -87,6 +87,9 @@ if __name__ == "__main__":
         filter_section = read_to_str(filter_path)
         begin_section = read_to_str(begin_path)
 
+        # read configs template
+        cfg_section = read_to_str(cfg["configs"])
+
         # create the outputs
         for out in cfg["sources"]:
             logging.info(f"exporting script {entry} : {out}")
@@ -99,6 +102,7 @@ if __name__ == "__main__":
             tmp = read_template(template_path)
 
             res = tmp.render(
+                config_section=cfg_section,
                 begin_section=begin_section,
                 filter=filter_section,
                 capture_metadata=True,
@@ -114,6 +118,7 @@ if __name__ == "__main__":
             tmp = read_template(template_path)
 
             res = tmp.render(
+                config_section=cfg_section,
                 begin_section=begin_section,
                 filter=filter_section,
                 capture_metadata=False,

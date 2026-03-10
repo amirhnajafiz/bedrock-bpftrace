@@ -1,5 +1,9 @@
 #!/usr/bin/env bpftrace
 
+config {
+  perf_rb_pages = 512
+}
+
 BEGIN
 {
   @tracked_cgid = (uint64)$1;
