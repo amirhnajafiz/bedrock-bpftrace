@@ -1,20 +1,29 @@
-# file: scripts/gen_bpftrace.py
-# generating bpftrace scripts by reading the j2 files in `templates` directory.
-
 import json
 import logging
 import os
+import sys
+from typing import Dict, List
 
 from jinja2 import Template
 
+# global variables
 CONFIG_PATH = "tracers.json"
 
 
-def import_json(path: str) -> dict:
+def import_json(path: str) -> Dict[str, List[str]]:
     """Import json data into a dictionary.
 
-    :param path: path to the json file
+    Parameters
+    ----------
+    path : str
+        file path
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        the json data in dict format
     """
+
     data = {}
     with open(path, "r") as file:
         data = json.load(file)
@@ -24,9 +33,17 @@ def import_json(path: str) -> dict:
 def read_to_str(path: str) -> str:
     """Read a file data into a string.
 
-    :param path: file path
-    :return str: file content
+    Parameters
+    ----------
+    path : str
+        file path
+
+    Returns
+    -------
+    str
+        the file data in string format
     """
+
     try:
         data = ""
         with open(path, "r") as file:
@@ -39,31 +56,39 @@ def read_to_str(path: str) -> str:
 def read_template(path: str) -> Template:
     """Read template into jinja2 object.
 
-    :param path: jinja2 template
-    :return jinja2.Template: the template object
+    Parameters
+    ----------
+    path : str
+        file path
+
+    Returns
+    -------
+    Template
+        the template in jinja2 Template format
     """
+
     return Template(open(path).read())
 
 
 def save_template(out: str, data: str) -> None:
     """Save the templates into files.
 
-    :param path: output path
-    :param data: content to write
+    Parameters
+    ----------
+    out : str
+        output path
+    data : str
+        content to write
     """
+
     with open(out, "w") as file:
         file.write(data)
 
 
-if __name__ == "__main__":
+def main():
     # load the configs
     cfg = import_json(CONFIG_PATH)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
     logging.info(f"loading templates from {CONFIG_PATH}")
 
     # form the template paths
@@ -130,3 +155,17 @@ if __name__ == "__main__":
             logging.info(f"template saved: {output_path}")
 
     logging.info("done")
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    try:
+        main()
+    except Exception as e:
+        logging.error(f"error: {e}")
+        sys.exit(1)
