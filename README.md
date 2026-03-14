@@ -5,34 +5,75 @@
 [![Latest Tag](https://img.shields.io/github/v/tag/amirhnajafiz/bedrock-bpftrace)](https://github.com/amirhnajafiz/bedrock-bpftrace/tags)
 ![Image Size](https://img.shields.io/badge/image_size-861_MB-blue)
 
-**Bedrock BPFtrace** provides ready-to-use and templated [BPFtrace](https://github.com/iovisor/bpftrace) scripts used by the [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer). All scripts are generated from **Python (Jinja2)** templates and compiled into `.bt` tracing programs.
+**Bedrock BPFtrace** provides ready-to-use, templated [BPFtrace](https://github.com/iovisor/bpftrace) scripts for the [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer). Scripts are generated from **Jinja2** templates via Python and compiled into `.bt` tracing programs targeting the Linux kernel.
+
+---
+
+## Table of Contents
+
+- [Bedrock BPFtrace](#bedrock-bpftrace)
+  - [Table of Contents](#table-of-contents)
+  - [✨ Overview](#-overview)
+  - [🧰 Requirements](#-requirements)
+    - [Running scripts directly with `bpftrace`](#running-scripts-directly-with-bpftrace)
+  - [🚀 Setup](#-setup)
+    - [Linux (native)](#linux-native)
+    - [Docker](#docker)
+    - [Kernel support check](#kernel-support-check)
+  - [⚙️ Script Generation](#️-script-generation)
+  - [🔍 Script Categories](#-script-categories)
+    - [Filter targets](#filter-targets)
+    - [Tracing types](#tracing-types)
+  - [🧠 Headless Mode](#-headless-mode)
+  - [🪶 Log Format](#-log-format)
+    - [V0](#v0)
+    - [V1](#v1)
+    - [Common field reference](#common-field-reference)
+  - [📚 Tracing Events](#-tracing-events)
+  - [🧩 Related Projects](#-related-projects)
+  - [🤝 Contributing](#-contributing)
+  - [📄 License](#-license)
+
+---
 
 ## ✨ Overview
 
-Bedrock BPFtrace delivers the dynamic tracing layer for Bedrock’s observability stack, offering rich visibility into file system, network, and process-level I/O.  
+Bedrock BPFtrace is the dynamic tracing layer of Bedrock's observability stack. It provides deep visibility into file system I/O, memory-mapped operations, and process-level activity by hooking into the Linux kernel through eBPF.
 
-Scripts are auto-generated and located under the `bpftrace/` directory, making them compatible with the `bpftrace` CLI or Bedrock Tracer runtime.
+Pre-generated scripts live under `bpftrace/` and are compatible with either the `bpftrace` CLI or the Bedrock Tracer runtime. Each script is produced from a versioned Jinja2 template, so output format and probe selection can be extended without modifying individual `.bt` files.
+
+---
 
 ## 🧰 Requirements
 
-To use `.bt` scripts directly with `bpftrace`, install:
+### Running scripts directly with `bpftrace`
 
-- **libbpf** ≥ v1.5.0  
-- **bpftrace** ≥ v0.24.0  
-- **python3**  
-- **python3-venv**
+| Dependency   | Minimum version |
+|--------------|-----------------|
+| libbpf       | v1.5.0          |
+| bpftrace     | v0.24.0         |
+| python3      | —               |
+| python3-venv | —               |
 
-### Install on Linux
+A BTF-enabled kernel is strongly recommended (kernel ≥ 5.8).
 
-If you have an Ubuntu 24.04 machine, then you can run `install-bpftrace.sh` script to have **bpftrace** and **libbpf** installed.
+---
 
-> WARN: This script may not work on all Linux machines/kernels. Using the docker image would be a safer solution.
+## 🚀 Setup
 
-### Using with Docker
+### Linux (native)
 
-The Bedrock BPFtrace has a base docker image that you can use. It already has **bpftrace**, **libbpf**, and **python3** installed.
+On **Ubuntu 24.04**, run the provided installation script to install `bpftrace` and `libbpf`:
 
-The container needs a host that supports eBPF (prefer BTF-enabled kernels). Also it requires privilege access to trace host processes.
+```sh
+bash install-bpftrace.sh
+```
+
+> **Warning:** This script targets Ubuntu 24.04. On other distributions or kernel versions, manual installation is recommended. Using the Docker image is the safer alternative.
+
+### Docker
+
+A pre-built Docker image is available with `bpftrace`, `libbpf`, and `python3` already installed. The container requires a BTF-enabled host kernel and privileged access to trace host processes.
 
 ```sh
 docker run --rm \
@@ -43,92 +84,120 @@ docker run --rm \
     -it ghcr.io/amirhnajafiz/bedrock-bpftrace:latest
 ```
 
-> WARN: This may exploit security risks.
+> **Warning:** Running a container in privileged mode grants it full access to the host. Only do this in trusted environments.
 
-#### local docker image build
+To build the image locally instead:
 
-Alternatively, you can use the included **Docker environment** for isolated builds.
-
-```bash
-# Build Docker image for Bedrock BPFtrace
+```sh
 bash tests/docker_build.sh
 ```
 
-### Kernel Support
+The image embeds the following utilities under `/usr/local/bedrock/`:
 
-To check if your machine is capable of running the bpftrace scripts, you can run the following kernel support check script:
+| File / Directory    | Purpose                                |
+|---------------------|----------------------------------------|
+| `bpftrace/`         | Pre-generated Bedrock BPFtrace scripts |
+| `bt_scripts.sh`     | Dry-run testing for all `.bt` scripts  |
+| `kernel_support.sh` | Host kernel compatibility check        |
+
+> **Note:** No `sudo` is needed when the container runs in privileged mode.
+
+### Kernel support check
+
+Before running any script, verify that your kernel supports eBPF tracing:
 
 ```sh
-$ sudo ./tests/kernel_support.sh
+sudo ./tests/kernel_support.sh
+```
+
+Expected output on a supported system:
+
+```text
 [INFO] Kernel: 6.8.0-101-generic
 [OK] BTF detected
 [SUCCESS] Host is capable of running bpftrace scripts
 ```
 
-The test scripts are also embedded in the docker image. You can find them under `/usr/local/bedrock` directory.
+---
 
-- `bpftrace/` : contains the bedrock bpftrace scripts.
-- `bt_scripts.sh` : dry run testing to check bpftrace scripts.
-- `kernel_support.sh` : check the host kernel for bpftrace support.
+## ⚙️ Script Generation
 
-> NOTE: When you run the container in privileged mode, you don't need to run these tests with `sudo`.
+Pre-generated scripts are already present in `bpftrace/` and can be used immediately. To modify templates or regenerate scripts from scratch:
 
-## ⚙️ Installation & Script Generation
+**Full setup** (installs Python dependencies into a virtual environment):
 
-Scripts are already pre-generated under `bpftrace/`.  
-If you want to modify templates or regenerate everything, choose one of the options below:
-
-### Option 1 — Full setup (with all dependencies)
-
-```bash
+```sh
 make setup
 make
 ```
 
-> Ensure Python 3 and `python3-venv` are installed.
+**Regenerate only** (when dependencies are already installed):
 
-### Option 2 — Lightweight regeneration (no system dependencies)
-
-```bash
+```sh
 make
 ```
 
-After successful execution, all generated `.bt` files will appear in `bpftrace/`.
+After a successful run, all `.bt` files are written to `bpftrace/`.
+
+For details on the template system and how to add new tracers, see [DEV.md](DEV.md).
+
+---
 
 ## 🔍 Script Categories
 
-Bedrock BPFtrace generates tracing scripts across the following categories:
+Scripts are organized by the *target* they filter on and the *tracing type* they apply.
 
-- Trace by **PID**
-- Trace by **process name (command)**
-- **Execute and trace** a command
-- Trace by **cgroup**
-- Trace by **process name within a cgroup**
+### Filter targets
 
-Each category supports multiple tracing types:
+| Directory             | Filters on                             |
+|-----------------------|----------------------------------------|
+| `pid/`                | Process ID                             |
+| `command/`            | Process name                           |
+| `execute/`            | Spawned command (executes then traces) |
+| `cgroup/`             | Control group                          |
+| `cgroup_and_command/` | Process name within a cgroup           |
 
-1. **File System I/O Tracing** — High-level VFS read/write tracking.  
-2. **Basic I/O Tracing** — Standard read/write tracing with file path visibility (moderate overhead).  
-3. **Memory-Mapped I/O Tracing** — Detailed operations via memory mapping (higher overhead, verbose output).
+### Tracing types
+
+Each filter target produces three script variants:
+
+| Script            | Tracing type                 | Overhead |
+|-------------------|------------------------------|----------|
+| `vfs_trace.bt`    | VFS-level I/O (read/write)   | Low      |
+| `io_trace.bt`     | Syscall I/O with file path   | Moderate |
+| `memory_trace.bt` | Memory-mapped I/O operations | High     |
+
+Each variant also has a `headless_` prefixed counterpart (see [Headless Mode](#-headless-mode)).
+
+Script versions (`v0/`, `v1/`) correspond to different log output formats (see [Log Format](#-log-format)).
+
+---
 
 ## 🧠 Headless Mode
 
-A **headless mode** is available for reduced log size and overhead.  
-In this mode, metadata collection is skipped—useful for system-wide I/O summaries and performance-focused tracing runs.
+Headless scripts (`headless_*.bt`) skip metadata collection (file names, process names, etc.), producing minimal output. Use them when:
+
+- You need system-wide I/O throughput summaries.
+- Metadata collection overhead is unacceptable.
+- Log volume must be kept small.
+
+---
 
 ## 🪶 Log Format
 
-The output produced by BPFtrace scripts follows a structured format for easy parsing.
+All scripts emit structured, line-oriented log records for easy parsing.
 
-### V0 (old version)
+### V0
 
-It requires grouping EN and EX entires.
+Entry (`EN`) and exit (`EX`) events are emitted as separate lines and must be correlated by `pid`/`tid` during post-processing.
+
+**Format:**
 
 ```text
-[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [EN|EX] [operand] } { [key=value], }
+[timestamp] {pid=[pid] tid=[tid] proc=[command]}{EN|EX [operand]}{[key=value], ...}
 ```
 
-Example:
+**Example:**
 
 ```text
 [171243.918] {pid=4123 tid=4123 proc=nginx}{EN read}{fd=5, fname=/var/log/access.log}
@@ -137,44 +206,60 @@ Example:
 
 ### V1
 
-By using ebpf maps, it groups the EN and EX events inside the bpftrace script.
+Entry and exit events are merged inside the BPF program using eBPF maps, eliminating the need for client-side correlation.
+
+**Format:**
 
 ```text
-[timestamp] {pid=[pid] tid=[tid] proc=[command]} { [operand] } { [key=value], }
+[timestamp] {pid=[pid] tid=[tid] proc=[command]}{[operand]}{[key=value], ...}
 ```
 
-Example:
+**Example:**
 
 ```text
 [171245.200] {pid=4123 tid=4123 proc=nginx}{read}{fd=5, fname=/var/log/access.log, duration=11, ret=500}
 ```
 
-### Common Keys
+### Common field reference
 
-Here is a list of keys that you will get as `[key=value]` pairs.
+| Key        | Description                      |
+|------------|----------------------------------|
+| `fname`    | File name or absolute path       |
+| `fd`       | File descriptor                  |
+| `ret`      | System call return value         |
+| `count`    | Number of bytes transferred      |
+| `duration` | Call latency in nanoseconds      |
+| `addr`     | Memory address (memory ops only) |
 
-- `fname` : file name (could be absolute path too)
-- `ret` : return value
-- `fd` : file descriptor
-- `count` : number of data bytes
-- `duration` : latency in nano-seconds
-- `addr` : memory address
+---
 
 ## 📚 Tracing Events
 
-A detailed specification of all event types is available in [EVENTS.md](EVENTS.md).
+A full specification of all kernel probes and syscalls used by each script type is available in [EVENTS.md](EVENTS.md).
+
+---
 
 ## 🧩 Related Projects
 
-- [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer) — Core tracing engine using Bedrock BPFtrace scripts.
-- [bpftrace](https://github.com/iovisor/bpftrace) — BPF-based tracing CLI tool built on libbpf.
+| Project                                                          | Description                                                |
+|------------------------------------------------------------------|------------------------------------------------------------|
+| [Bedrock Tracer](https://github.com/amirhnajafiz/bedrock-tracer) | Core tracing engine that consumes Bedrock BPFtrace scripts |
+| [bpftrace](https://github.com/iovisor/bpftrace)                  | BPF-based high-level tracing language and CLI              |
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Fork this repository, open a pull request, or file an issue to report bugs or request new features.
+Contributions are welcome. To get started:
 
-Please follow the [project’s code and documentation style for consistency](DEV.md).
+1. Fork the repository.
+2. Create a feature branch.
+3. Submit a pull request with a clear description of your changes.
+
+For template conventions, script naming rules, and testing procedures, refer to [DEV.md](DEV.md).
+
+---
 
 ## 📄 License
 
-This project is licensed under the [Apache License](LICENSE).
+This project is licensed under the [Apache 2.0 License](LICENSE).
