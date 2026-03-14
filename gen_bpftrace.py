@@ -88,7 +88,8 @@ if __name__ == "__main__":
         begin_section = read_to_str(begin_path)
 
         # read configs template
-        cfg_section = read_to_str(cfg["configs"])
+        cfg_tmp = read_template(cfg["config_source"])
+        cfg_section = cfg_tmp.render(**cfg["configs"])
 
         # create the outputs
         for out in cfg["sources"]:

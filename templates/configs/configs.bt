@@ -1,5 +1,0 @@
-#!/usr/bin/env bpftrace
-
-config = {
-  perf_rb_pages = 512;
-}
